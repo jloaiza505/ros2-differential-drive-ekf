@@ -1,0 +1,23 @@
+[1.864s] Invoking command in '/home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/src/robot_sim_pkg': PYTHONPATH=/home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/build/robot_sim_pkg/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/install/robot_sim_pkg/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/robot_sim_pkg build --build-base /home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/build/robot_sim_pkg/build install --record /home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/build/robot_sim_pkg/install.log --single-version-externally-managed install_data
+[2.113s] running egg_info
+[2.113s] writing ../../build/robot_sim_pkg/robot_sim_pkg.egg-info/PKG-INFO
+[2.114s] writing dependency_links to ../../build/robot_sim_pkg/robot_sim_pkg.egg-info/dependency_links.txt
+[2.115s] writing entry points to ../../build/robot_sim_pkg/robot_sim_pkg.egg-info/entry_points.txt
+[2.115s] writing requirements to ../../build/robot_sim_pkg/robot_sim_pkg.egg-info/requires.txt
+[2.115s] writing top-level names to ../../build/robot_sim_pkg/robot_sim_pkg.egg-info/top_level.txt
+[2.117s] reading manifest file '../../build/robot_sim_pkg/robot_sim_pkg.egg-info/SOURCES.txt'
+[2.122s] writing manifest file '../../build/robot_sim_pkg/robot_sim_pkg.egg-info/SOURCES.txt'
+[2.122s] running build
+[2.122s] running build_py
+[2.122s] copying robot_sim_pkg/robot_sim_node.py -> /home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/build/robot_sim_pkg/build/lib/robot_sim_pkg
+[2.122s] running install
+[2.123s] running install_lib
+[2.124s] copying /home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/build/robot_sim_pkg/build/lib/robot_sim_pkg/robot_sim_node.py -> /home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/install/robot_sim_pkg/lib/python3.10/site-packages/robot_sim_pkg
+[2.128s] byte-compiling /home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/install/robot_sim_pkg/lib/python3.10/site-packages/robot_sim_pkg/robot_sim_node.py to robot_sim_node.cpython-310.pyc
+[2.129s] running install_data
+[2.130s] running install_egg_info
+[2.131s] removing '/home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/install/robot_sim_pkg/lib/python3.10/site-packages/robot_sim_pkg-0.0.0-py3.10.egg-info' (and everything under it)
+[2.132s] Copying ../../build/robot_sim_pkg/robot_sim_pkg.egg-info to /home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/install/robot_sim_pkg/lib/python3.10/site-packages/robot_sim_pkg-0.0.0-py3.10.egg-info
+[2.134s] running install_scripts
+[2.158s] writing list of installed files to '/home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/build/robot_sim_pkg/install.log'
+[2.236s] Invoked command in '/home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/src/robot_sim_pkg' returned '0': PYTHONPATH=/home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/build/robot_sim_pkg/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/install/robot_sim_pkg/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/robot_sim_pkg build --build-base /home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/build/robot_sim_pkg/build install --record /home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/build/robot_sim_pkg/install.log --single-version-externally-managed install_data

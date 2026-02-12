@@ -1,0 +1,33 @@
+[1.822s] Invoking command in '/home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/src/bringup_pkg': PYTHONPATH=/home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/build/bringup_pkg/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/install/bringup_pkg/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/bringup_pkg build --build-base /home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/build/bringup_pkg/build install --record /home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/build/bringup_pkg/install.log --single-version-externally-managed install_data
+[2.169s] running egg_info
+[2.175s] creating ../../build/bringup_pkg/bringup_pkg.egg-info
+[2.175s] writing ../../build/bringup_pkg/bringup_pkg.egg-info/PKG-INFO
+[2.178s] writing dependency_links to ../../build/bringup_pkg/bringup_pkg.egg-info/dependency_links.txt
+[2.178s] writing entry points to ../../build/bringup_pkg/bringup_pkg.egg-info/entry_points.txt
+[2.180s] writing requirements to ../../build/bringup_pkg/bringup_pkg.egg-info/requires.txt
+[2.180s] writing top-level names to ../../build/bringup_pkg/bringup_pkg.egg-info/top_level.txt
+[2.182s] writing manifest file '../../build/bringup_pkg/bringup_pkg.egg-info/SOURCES.txt'
+[2.185s] reading manifest file '../../build/bringup_pkg/bringup_pkg.egg-info/SOURCES.txt'
+[2.187s] writing manifest file '../../build/bringup_pkg/bringup_pkg.egg-info/SOURCES.txt'
+[2.188s] running build
+[2.189s] running build_py
+[2.189s] creating /home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/build/bringup_pkg/build
+[2.189s] creating /home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/build/bringup_pkg/build/lib
+[2.189s] creating /home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/build/bringup_pkg/build/lib/bringup_pkg
+[2.189s] copying bringup_pkg/__init__.py -> /home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/build/bringup_pkg/build/lib/bringup_pkg
+[2.189s] running install
+[2.189s] running install_lib
+[2.190s] creating /home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/install/bringup_pkg/lib/python3.10/site-packages/bringup_pkg
+[2.190s] copying /home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/build/bringup_pkg/build/lib/bringup_pkg/__init__.py -> /home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/install/bringup_pkg/lib/python3.10/site-packages/bringup_pkg
+[2.191s] byte-compiling /home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/install/bringup_pkg/lib/python3.10/site-packages/bringup_pkg/__init__.py to __init__.cpython-310.pyc
+[2.191s] running install_data
+[2.191s] creating /home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/install/bringup_pkg/share/ament_index
+[2.191s] creating /home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/install/bringup_pkg/share/ament_index/resource_index
+[2.191s] creating /home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/install/bringup_pkg/share/ament_index/resource_index/packages
+[2.191s] copying resource/bringup_pkg -> /home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/install/bringup_pkg/share/ament_index/resource_index/packages
+[2.191s] copying package.xml -> /home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/install/bringup_pkg/share/bringup_pkg
+[2.191s] running install_egg_info
+[2.191s] Copying ../../build/bringup_pkg/bringup_pkg.egg-info to /home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/install/bringup_pkg/lib/python3.10/site-packages/bringup_pkg-0.0.0-py3.10.egg-info
+[2.192s] running install_scripts
+[2.219s] writing list of installed files to '/home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/build/bringup_pkg/install.log'
+[2.358s] Invoked command in '/home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/src/bringup_pkg' returned '0': PYTHONPATH=/home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/build/bringup_pkg/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/install/bringup_pkg/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/bringup_pkg build --build-base /home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/build/bringup_pkg/build install --record /home/james/ros2_projects/ros2-differential-drive-ekf/ros2_ws/build/bringup_pkg/install.log --single-version-externally-managed install_data
