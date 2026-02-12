@@ -1,4 +1,6 @@
 import math
+import csv
+from pathlib import Path as FsPath
 
 import numpy as np
 import rclpy
@@ -28,15 +30,19 @@ class EkfNode(Node):
     def __init__(self):
         super().__init__('ekf_node')
 
+        # Runtime parameters
+        self.q_pos = float(self.declare_parameter('q_pos', 0.02).value)
+        self.q_yaw = float(self.declare_parameter('q_yaw', 0.03).value)
+        self.r_odom_pos = float(self.declare_parameter('r_odom_pos', 0.05).value)
+        self.r_imu_yaw = float(self.declare_parameter('r_imu_yaw', 0.04).value)
+        self.use_wheel_pos_update = bool(self.declare_parameter('use_wheel_pos_update', True).value)
+        self.metrics_period_sec = float(self.declare_parameter('metrics_period_sec', 5.0).value)
+        self.path_max_points = int(self.declare_parameter('path_max_points', 1200).value)
+        self.metrics_csv_path = str(self.declare_parameter('metrics_csv_path', '').value).strip()
+
         # State: [x, y, yaw]
         self.x = np.zeros(3)
         self.P = np.diag([1.0, 1.0, 0.5])
-
-        # Noise
-        self.q_pos = 0.02
-        self.q_yaw = 0.03
-        self.r_odom_pos = 0.05
-        self.r_imu_yaw = 0.04
 
         # Measurement cache
         self.last_imu_yaw = None
@@ -51,7 +57,6 @@ class EkfNode(Node):
         self.filtered_path.header.frame_id = 'odom'
         self.gt_path = Path()
         self.gt_path.header.frame_id = 'odom'
-        self.path_max_points = 1200
 
         # Metrics
         self.sample_count = 0
@@ -60,6 +65,10 @@ class EkfNode(Node):
         self.sum_sq_raw_yaw = 0.0
         self.sum_sq_filt_yaw = 0.0
         self.start_gt = None
+        self.last_gt = None
+        self.csv_writer = None
+        self.csv_handle = None
+        self.start_time_sec = None
 
         self.create_subscription(Odometry, '/wheel/odom', self.on_wheel_odom, 20)
         self.create_subscription(Imu, '/imu/data', self.on_imu, 20)
@@ -70,8 +79,42 @@ class EkfNode(Node):
         self.filtered_path_pub = self.create_publisher(Path, '/ekf/path', 10)
         self.gt_path_pub = self.create_publisher(Path, '/ground_truth/path', 10)
 
-        self.metrics_timer = self.create_timer(5.0, self.log_metrics)
-        self.get_logger().info('EKF node started.')
+        self.metrics_timer = self.create_timer(self.metrics_period_sec, self.log_metrics)
+        self.init_csv_writer()
+        self.get_logger().info(
+            'EKF node started. q_pos={:.3f}, q_yaw={:.3f}, r_odom_pos={:.3f}, r_imu_yaw={:.3f}, '
+            'wheel_pos_update={}, metrics_period={}s'.format(
+                self.q_pos,
+                self.q_yaw,
+                self.r_odom_pos,
+                self.r_imu_yaw,
+                self.use_wheel_pos_update,
+                self.metrics_period_sec,
+            )
+        )
+
+    def init_csv_writer(self):
+        if not self.metrics_csv_path:
+            return
+        csv_path = FsPath(self.metrics_csv_path).expanduser()
+        csv_path.parent.mkdir(parents=True, exist_ok=True)
+        self.csv_handle = csv_path.open('w', newline='', encoding='utf-8')
+        self.csv_writer = csv.writer(self.csv_handle)
+        self.csv_writer.writerow([
+            'elapsed_sec',
+            'samples',
+            'rmse_raw_pos_m',
+            'rmse_filt_pos_m',
+            'rmse_reduction_pct',
+            'rmse_raw_yaw_rad',
+            'rmse_filt_yaw_rad',
+            'raw_drift_m',
+            'filt_drift_m',
+            'drift_reduction_pct',
+            'gt_travel_m',
+        ])
+        self.csv_handle.flush()
+        self.get_logger().info('Metrics CSV logging enabled: {}'.format(csv_path))
 
     def on_imu(self, msg):
         self.last_imu_yaw = yaw_from_quaternion(msg.orientation)
@@ -110,19 +153,20 @@ class EkfNode(Node):
         Q = np.diag([self.q_pos * dt, self.q_pos * dt, self.q_yaw * dt])
         self.P = F @ self.P @ F.T + Q
 
-        # Update from wheel odometry position (soft correction)
-        z_pos = np.array([msg.pose.pose.position.x, msg.pose.pose.position.y])
-        H_pos = np.array([
-            [1.0, 0.0, 0.0],
-            [0.0, 1.0, 0.0],
-        ])
-        R_pos = np.diag([self.r_odom_pos, self.r_odom_pos])
-        y_pos = z_pos - H_pos @ self.x
-        S_pos = H_pos @ self.P @ H_pos.T + R_pos
-        K_pos = self.P @ H_pos.T @ np.linalg.inv(S_pos)
-        self.x = self.x + K_pos @ y_pos
-        self.x[2] = wrap_angle(self.x[2])
-        self.P = (np.eye(3) - K_pos @ H_pos) @ self.P
+        if self.use_wheel_pos_update:
+            # Optional soft correction using wheel odometry position.
+            z_pos = np.array([msg.pose.pose.position.x, msg.pose.pose.position.y])
+            H_pos = np.array([
+                [1.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0],
+            ])
+            R_pos = np.diag([self.r_odom_pos, self.r_odom_pos])
+            y_pos = z_pos - H_pos @ self.x
+            S_pos = H_pos @ self.P @ H_pos.T + R_pos
+            K_pos = self.P @ H_pos.T @ np.linalg.inv(S_pos)
+            self.x = self.x + K_pos @ y_pos
+            self.x[2] = wrap_angle(self.x[2])
+            self.P = (np.eye(3) - K_pos @ H_pos) @ self.P
 
         # Update from IMU yaw (yaw-only correction)
         if self.last_imu_yaw is not None:
@@ -158,6 +202,10 @@ class EkfNode(Node):
 
         if self.start_gt is None:
             self.start_gt = gt.copy()
+        self.last_gt = gt.copy()
+        now_sec = self.get_clock().now().nanoseconds * 1e-9
+        if self.start_time_sec is None:
+            self.start_time_sec = now_sec
 
         self.append_path_point(self.gt_path, stamp, gt)
         self.gt_path_pub.publish(self.gt_path)
@@ -223,8 +271,7 @@ class EkfNode(Node):
         if rmse_raw_pos > 1e-9:
             rmse_reduction = 100.0 * (rmse_raw_pos - rmse_filt_pos) / rmse_raw_pos
 
-        current_gt_xy = self.gt_path.poses[-1].pose.position
-        gt_now = np.array([current_gt_xy.x, current_gt_xy.y])
+        gt_now = self.last_gt[:2]
         start_xy = self.start_gt[:2]
         travel_dist = np.linalg.norm(gt_now - start_xy)
 
@@ -239,6 +286,27 @@ class EkfNode(Node):
             drift_msg += ' (reduction=n/a; raw drift near zero)'
         else:
             drift_msg += ' (reduction={:.1f}%)'.format(drift_reduction)
+
+        elapsed_sec = 0.0
+        if self.start_time_sec is not None:
+            elapsed_sec = self.get_clock().now().nanoseconds * 1e-9 - self.start_time_sec
+
+        if self.csv_writer is not None:
+            drift_reduction_csv = '' if drift_reduction is None else '{:.6f}'.format(drift_reduction)
+            self.csv_writer.writerow([
+                '{:.3f}'.format(elapsed_sec),
+                self.sample_count,
+                '{:.6f}'.format(rmse_raw_pos),
+                '{:.6f}'.format(rmse_filt_pos),
+                '{:.6f}'.format(rmse_reduction),
+                '{:.6f}'.format(rmse_raw_yaw),
+                '{:.6f}'.format(rmse_filt_yaw),
+                '{:.6f}'.format(raw_drift),
+                '{:.6f}'.format(filt_drift),
+                drift_reduction_csv,
+                '{:.6f}'.format(travel_dist),
+            ])
+            self.csv_handle.flush()
 
         self.get_logger().info(
             'RMSE pos raw={:.3f} m filt={:.3f} m (reduction={:.1f}%), '
@@ -262,5 +330,7 @@ def main(args=None):
     except (KeyboardInterrupt, ExternalShutdownException):
         pass
     finally:
+        if node.csv_handle is not None:
+            node.csv_handle.close()
         node.destroy_node()
         rclpy.try_shutdown()

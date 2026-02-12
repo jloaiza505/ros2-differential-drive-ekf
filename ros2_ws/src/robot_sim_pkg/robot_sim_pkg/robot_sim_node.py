@@ -15,13 +15,13 @@ class RobotSimNode(Node):
         super().__init__('robot_sim_node')
 
         # Simulation parameters
-        self.dt = 0.02
-        self.wheel_radius = 0.05
-        self.wheel_base = 0.30
+        self.dt = self.declare_parameter('dt', 0.02).value
+        self.wheel_radius = self.declare_parameter('wheel_radius', 0.05).value
+        self.wheel_base = self.declare_parameter('wheel_base', 0.30).value
 
         # Command profile in body frame
-        self.v_cmd = 0.50
-        self.w_cmd = 0.20
+        self.v_cmd = self.declare_parameter('v_cmd', 0.50).value
+        self.w_cmd = self.declare_parameter('w_cmd', 0.20).value
 
         # Ground truth state
         self.x = 0.0
@@ -34,10 +34,12 @@ class RobotSimNode(Node):
         self.yaw_odom = 0.0
 
         # Noise parameters
-        self.left_wheel_noise_std = 0.12
-        self.right_wheel_noise_std = 0.12
-        self.imu_yaw_noise_std = 0.06
-        self.imu_wz_noise_std = 0.03
+        self.left_wheel_noise_std = self.declare_parameter('left_wheel_noise_std', 0.12).value
+        self.right_wheel_noise_std = self.declare_parameter('right_wheel_noise_std', 0.12).value
+        self.imu_yaw_noise_std = self.declare_parameter('imu_yaw_noise_std', 0.06).value
+        self.imu_wz_noise_std = self.declare_parameter('imu_wz_noise_std', 0.03).value
+        random_seed = int(self.declare_parameter('random_seed', 42).value)
+        self.rng = np.random.default_rng(random_seed)
 
         # Publishers
         self.gt_pub = self.create_publisher(Odometry, '/ground_truth/odom', 10)
@@ -47,7 +49,16 @@ class RobotSimNode(Node):
 
         # Timer
         self.timer = self.create_timer(self.dt, self.update)
-        self.get_logger().info('Robot simulation started.')
+        self.get_logger().info(
+            'Robot simulation started. dt={:.3f}, seed={}, noise(l={:.3f}, r={:.3f}, yaw={:.3f}, wz={:.3f})'.format(
+                self.dt,
+                random_seed,
+                self.left_wheel_noise_std,
+                self.right_wheel_noise_std,
+                self.imu_yaw_noise_std,
+                self.imu_wz_noise_std,
+            )
+        )
 
 
     def update(self):
@@ -65,8 +76,8 @@ class RobotSimNode(Node):
         self.yaw += w_true * self.dt
 
         # Wheel odometry integration from noisy wheel rates
-        v_l_noisy = v_l + np.random.normal(0.0, self.left_wheel_noise_std)
-        v_r_noisy = v_r + np.random.normal(0.0, self.right_wheel_noise_std)
+        v_l_noisy = v_l + self.rng.normal(0.0, self.left_wheel_noise_std)
+        v_r_noisy = v_r + self.rng.normal(0.0, self.right_wheel_noise_std)
         v_odom = self.wheel_radius * (v_r_noisy + v_l_noisy) / 2.0
         w_odom = self.wheel_radius * (v_r_noisy - v_l_noisy) / self.wheel_base
         self.x_odom += v_odom * math.cos(self.yaw_odom) * self.dt
@@ -103,9 +114,9 @@ class RobotSimNode(Node):
         imu_msg.header.stamp = now
         imu_msg.header.frame_id = 'base_link'
         imu_msg.orientation = self.yaw_to_quaternion(
-            self.yaw + np.random.normal(0.0, self.imu_yaw_noise_std)
+            self.yaw + self.rng.normal(0.0, self.imu_yaw_noise_std)
         )
-        imu_msg.angular_velocity.z = w_true + np.random.normal(0.0, self.imu_wz_noise_std)
+        imu_msg.angular_velocity.z = w_true + self.rng.normal(0.0, self.imu_wz_noise_std)
         imu_msg.linear_acceleration.x = 0.0
         imu_msg.linear_acceleration.y = 0.0
         imu_msg.linear_acceleration.z = 0.0
