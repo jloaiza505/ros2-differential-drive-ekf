@@ -63,8 +63,8 @@ Current evidence from the existing CSV and plots:
 - Drift reduction varies over time, with both positive and negative windows.
 
 ![Result: metrics plot from CSV](assets/images/ekf_metrics_all.png)
-![Result: RViz raw vs filtered vs ground-truth paths](assets/images/result_rviz_raw_filtered_gt.png)
-![Result: topic/terminal checks](assets/images/result_topics_check_terminal.png)
+![Result: RViz raw vs filtered vs ground-truth paths](assets/images/ekf_rviz_paths.png)
+![Result: topic/terminal checks](assets/images/topics_check_terminal.png)
 
 Optional run demo:
 
@@ -104,7 +104,7 @@ Key files for replication:
 - `tools/plot_metrics.py`
 - `.github/workflows/ci.yml`
 
-![Reproducibility: build and run commands](assets/images/repro_build_run_steps.png)
+![Reproducibility: build and run commands](assets/images/repro_build_steps.png)
 
 ## What to Improve
 - Add at least one absolute position measurement source to better evaluate position correction.
