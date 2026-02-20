@@ -1,24 +1,89 @@
-# ROS 2 workspace artifacts
-ros2_ws/build/
-ros2_ws/install/
-ros2_ws/log/
-
-# Generic build/output folders
+############################
+# ROS2 / colcon
+############################
 build/
 install/
 log/
-dist/
-*.egg-info/
+metrics/
+.colcon/
+.colcon_install_layout
 
-# Python artifacts
+############################
+# Python
+############################
 __pycache__/
 *.py[cod]
-.pytest_cache/
-.mypy_cache/
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+.eggs/
+.env
+.venv
+venv/
+pip-wheel-metadata/
 
-# Editors and OS files
+############################
+# CMake / C++
+############################
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+compile_commands.json
+*.so
+*.a
+*.o
+*.obj
+*.out
+
+############################
+# Testing / Coverage
+############################
+coverage/
+.coverage
+lcov.info
+test_results/
+
+############################
+# Logs / Runtime Data
+############################
+*.log
+*.bag
+*.db3
+*.sqlite3
+
+############################
+# Gazebo / Simulation (generic)
+############################
+*.world~
+*.model~
+gazebo-*
+
+############################
+# IDE / Editors
+############################
 .vscode/
 .idea/
 *.swp
-*~
+*.swo
+*.swn
+
+############################
+# OS
+############################
 .DS_Store
+Thumbs.db
+
+############################
+# Docker
+############################
+docker-compose.override.yml
+.env.local
+
+############################
+# Misc
+############################
+*.bak
+*.tmp
+*.orig

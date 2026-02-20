@@ -5,7 +5,7 @@ package_name = 'robot_sim_pkg'
 
 setup(
     name=package_name,
-    version='0.0.0',
+    version='0.1.0',
     packages=find_packages(exclude=['test']),
     data_files=[
         ('share/ament_index/resource_index/packages', ['resource/' + package_name]),
@@ -15,10 +15,10 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='james',
+    maintainer='jaime',
     maintainer_email='jloaiza505@gmail.com',
-    description='TODO: Package description',
-    license='TODO: License declaration',
+    description='Differential-drive robot simulation node, launch files, and RViz config.',
+    license='Apache-2.0',
     extras_require={
         'test': [
             'pytest',

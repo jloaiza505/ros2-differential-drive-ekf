@@ -1,123 +1,98 @@
-# ros2-differential-drive-ekf
-ROS 2 project that simulates a differential-drive robot, injects sensor noise, and estimates pose with an Extended Kalman Filter (EKF). The pipeline compares raw odometry against filtered output and reports quantitative error metrics.
+# ROS 2 Differential Drive EKF Workspace
 
-## Why This Project
-Wheel odometry drifts over time, especially with noise and slip-like perturbations. This project demonstrates:
-- Kinematic simulation for a differential-drive platform
-- Multi-sensor fusion (wheel odometry + IMU yaw) with EKF
-- Quantitative evaluation (RMSE and drift reduction)
-- Visualization and experiment reproducibility with ROS 2 launch + RViz
+This repository is a ROS 2 workspace for a simple differential-drive robot using:
+- `robot_sim_pkg` for noisy differential-drive simulation, RViz config, and launch
+- `state_estimator_pkg` for EKF fusion, filtered odometry, paths, and metrics logging
+- `bringup_pkg` for minimal bringup package baseline
 
-## Architecture
-```mermaid
-flowchart LR
-    SIM[robot_sim_node] --> GT[/ground_truth/odom]
-    SIM --> WO[/wheel/odom]
-    SIM --> IMU[/imu/data]
-    SIM --> TF[TF: odom -> base_link]
-    WO --> EKF[ekf_node]
-    IMU --> EKF
-    GT --> EKF
-    EKF --> EODOM[/ekf/odom]
-    EKF --> WPATH[/wheel/path]
-    EKF --> EPATH[/ekf/path]
-    EKF --> GPATH[/ground_truth/path]
-    EODOM --> RVIZ[RViz]
-    WPATH --> RVIZ
-    EPATH --> RVIZ
-    GPATH --> RVIZ
-    TF --> RVIZ
+## Workspace Structure
+
+```text
+ros2-differential-drive-ekf/
+├── src/
+│   ├── robot_sim_pkg/
+│   │   ├── launch/
+│   │   ├── robot_sim_pkg/
+│   │   └── rviz/
+│   ├── state_estimator_pkg/
+│   │   ├── state_estimator_pkg/
+│   │   └── test/
+│   └── bringup_pkg/
+│       ├── bringup_pkg/
+│       └── test/
+├── tools/
+├── build/      # generated
+├── install/    # generated
+└── log/        # generated
 ```
 
-## Repo Layout
-- `ros2_ws/src/robot_sim_pkg`: simulator, RViz config, launch file
-- `ros2_ws/src/state_estimator_pkg`: EKF node and metrics collection
-- `tools/plot_metrics.py`: utility to plot CSV experiment output
+![RViz EKF paths (proposed)](docs/assets/images/ekf_rviz_paths.png)
 
-## Requirements
-- Ubuntu 22.04
-- ROS 2 Humble
-- Python 3.10
-- `numpy`
-- Optional for plots: `matplotlib`
+## Prerequisites
 
-Install plotting dependency:
-```bash
-python3 -m pip install matplotlib
-```
+- Ubuntu with ROS 2 installed
+- Tested on ROS 2 Jazzy
+- `colcon` available
+- ROS 2 packages used by this workspace:
+  - `rclpy`
+  - `nav_msgs`
+  - `geometry_msgs`
+  - `sensor_msgs`
+  - `tf2_ros`
+  - `launch`
+  - `launch_ros`
+  - `rviz2`
+- Python dependencies:
+  - `numpy`
+  - optional: `matplotlib` (for plotting metrics CSVs)
 
 ## Build
+
+Run from the workspace root:
+
 ```bash
-cd ros2_ws
-source /opt/ros/humble/setup.bash
-colcon build --packages-select robot_sim_pkg state_estimator_pkg
+source /opt/ros/jazzy/setup.bash
+colcon build --base-paths src
 source install/setup.bash
 ```
 
-## One-Command Run
+## Run
+
+### 1. Full Simulation + EKF + RViz
+
 ```bash
+source /opt/ros/jazzy/setup.bash
+source install/setup.bash
 ros2 launch robot_sim_pkg phase1.launch.py
 ```
 
-RViz opens with:
-- Raw odometry in blue (`/wheel/odom`)
-- Filtered odometry in green (`/ekf/odom`)
-- Ground-truth path in gray (`/ground_truth/path`)
-- Raw and filtered path traces (`/wheel/path`, `/ekf/path`)
-- TF tree (fixed frame: `odom`)
+This launch starts:
+- `robot_sim_node` (ground truth + noisy wheel odometry + IMU)
+- `ekf_node` (state estimation and metrics)
+- `rviz2`
 
-## Launch Parameters (Experiment Knobs)
-You can tune sim and EKF at launch time:
+### 2. Run with Explicit Noise/Filter Parameters
+
 ```bash
+source /opt/ros/jazzy/setup.bash
+source install/setup.bash
 ros2 launch robot_sim_pkg phase1.launch.py \
   left_wheel_noise_std:=0.18 right_wheel_noise_std:=0.18 \
   imu_yaw_noise_std:=0.08 imu_wz_noise_std:=0.04 \
   r_imu_yaw:=0.20 q_yaw:=0.02 \
-  metrics_csv_path:=/tmp/ekf_metrics.csv random_seed:=7
+  metrics_csv_path:=metrics/ekf_metrics.csv random_seed:=7
 ```
 
-Important parameters:
-- Simulator:
-  - `left_wheel_noise_std`, `right_wheel_noise_std`
-  - `imu_yaw_noise_std`, `imu_wz_noise_std`
-  - `random_seed` (for reproducible runs)
-- EKF:
-  - `q_pos`, `q_yaw`
-  - `r_odom_pos`, `r_imu_yaw`
-  - `use_wheel_pos_update`
-  - `metrics_period_sec`
-  - `metrics_csv_path`
+### 3. Plot EKF Metrics CSV (Optional)
 
-## Metrics
-`ekf_node` prints periodic metrics:
-- Position RMSE (raw vs filtered)
-- Yaw RMSE (raw vs filtered)
-- RMSE reduction percentage
-- Drift (raw vs filtered) and drift reduction percentage
-
-If `metrics_csv_path` is set, metrics are also saved to CSV for post-processing.
-
-## Plotting Results
 ```bash
-python3 tools/plot_metrics.py /tmp/ekf_metrics.csv --out /tmp/ekf_metrics.png
+python3 tools/plot_metrics.py metrics/ekf_metrics.csv --out metrics/ekf_metrics.png
 ```
 
-## Suggested Portfolio Results Section
-Include these artifacts in your project page:
-1. RViz screenshot with all traces visible
-2. Metrics plot (`raw` vs `filtered` RMSE/drift over time)
-3. Table with averaged results over multiple seeds
+![Metrics plot (proposed)](docs/assets/images/ekf_metrics_all.png)
 
-Example table template:
+## Useful Checks
 
-| Seed | Raw Pos RMSE (m) | Filtered Pos RMSE (m) | Improvement (%) |
-|---|---:|---:|---:|
-| 1 | ... | ... | ... |
-| 2 | ... | ... | ... |
-| 3 | ... | ... | ... |
-| Mean | ... | ... | ... |
-
-## Quick Debug Commands
 ```bash
 ros2 topic hz /wheel/odom
 ros2 topic hz /ekf/odom
@@ -125,11 +100,39 @@ ros2 topic hz /imu/data
 ros2 run tf2_ros tf2_echo odom base_link
 ```
 
-## Limitations
-- Without an absolute position sensor (e.g., GPS, landmarks), EKF position correction is limited.
-- Current process/measurement models are intentionally simple for educational clarity.
+![Topic checks (proposed)](docs/assets/images/topics_check_terminal.png)
 
-## Next Improvements
-- Add automated launch/integration tests
-- Add richer process model (bias states, slip model)
-- Add absolute position update source for stronger drift suppression
+## Architecture View
+
+![ROS node graph (proposed)](docs/assets/images/arch_node_graph.png)
+
+## Reproducibility Snapshot
+
+![Build and source steps (proposed)](docs/assets/images/repro_build_steps.png)
+
+## Key Files
+
+- Simulator entrypoint: `src/robot_sim_pkg/robot_sim_pkg/robot_sim_node.py`
+- EKF entrypoint: `src/state_estimator_pkg/state_estimator_pkg/ekf_node.py`
+- Main launch: `src/robot_sim_pkg/launch/phase1.launch.py`
+- RViz config: `src/robot_sim_pkg/rviz/phase1.rviz`
+- Metrics plotting utility: `tools/plot_metrics.py`
+
+## Troubleshooting
+
+- Launch or package changes not reflected:
+  - Rebuild and re-source:
+    ```bash
+    colcon build --base-paths src
+    source install/setup.bash
+    ```
+
+## Notes
+
+- `.gitignore` excludes generated ROS 2 workspace artifacts (`build/`, `install/`, `log/`) and editor/system files.
+- Recommended README image assets to add:
+  - `docs/assets/images/ekf_rviz_paths.png`
+  - `docs/assets/images/ekf_metrics_plot.png`
+  - `docs/assets/images/topics_check_terminal.png`
+  - `docs/assets/images/arch_node_graph.png`
+  - `docs/assets/images/repro_build_steps.png`

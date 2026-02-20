@@ -9,7 +9,7 @@ import os
 def generate_launch_description():
     pkg_share = get_package_share_directory('robot_sim_pkg')
     rviz_config = os.path.join(pkg_share, 'rviz', 'phase1.rviz')
-    default_metrics_csv = '/tmp/ekf_metrics.csv'
+    default_metrics_csv = 'metrics/ekf_metrics.csv'
 
     declare_args = [
         DeclareLaunchArgument('dt', default_value='0.02'),
